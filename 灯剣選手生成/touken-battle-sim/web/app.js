@@ -3843,11 +3843,14 @@ function applyFinalizedTransfer(world, proposal, index) {
   return record;
 }
 
-function transferMarketDayPhase(day, totalDays) {
+function transferMarketDayPhase(day, totalDays, teamCount = 0) {
   const rate = day / Math.max(1, totalDays);
-  if (rate >= 0.84) return { key: "deadline", label: "終盤", pressure: 0.34, offerMultiplier: 1.08, maxDailyOffers: 18 };
-  if (rate >= 0.5) return { key: "middle", label: "中盤", pressure: 0.18, offerMultiplier: 1.02, maxDailyOffers: 14 };
-  return { key: "early", label: "序盤", pressure: 0.02, offerMultiplier: 0.96, maxDailyOffers: 10 };
+  // チーム数に応じて1日あたりの最大オファー数をスケールさせる。
+  // 大規模ワールド(100チーム以上)では候補も多いため、処理量を増やす。
+  const scale = Math.max(1, Math.ceil(teamCount / 24));
+  if (rate >= 0.84) return { key: "deadline", label: "終盤", pressure: 0.34, offerMultiplier: 1.08, maxDailyOffers: 18 * scale };
+  if (rate >= 0.5) return { key: "middle", label: "中盤", pressure: 0.18, offerMultiplier: 1.02, maxDailyOffers: 14 * scale };
+  return { key: "early", label: "序盤", pressure: 0.02, offerMultiplier: 0.96, maxDailyOffers: 10 * scale };
 }
 
 function transferOfferKey(offer) {
@@ -4037,18 +4040,25 @@ async function runTransferMarket() {
     const world = JSON.parse(JSON.stringify(state.world));
     const released = releaseExpiredPlayersToFreeAgency(world);
     const market = ensureTransferMarket(world);
-    market.days = { total: 30, current: 0 };
+    const regularTeamCountForDays = (world.teams || []).filter((team) => !team.competitionOnly).length;
+    // 市場日数もチーム規模に合わせて延長する。大規模ワールドでは1日あたりの
+    // オファー処理だけでは目標成立件数に届かないため、日数を増やす。
+    const marketDays = Math.min(90, Math.max(30, Math.ceil(regularTeamCountForDays * 0.6)));
+    market.days = { total: marketDays, current: 0 };
     market.dailyLogs = [];
     market.offerHistory = market.offerHistory || [];
     market.activeOffers = [];
     const regularTeamCount = (world.teams || []).filter((team) => !team.competitionOnly).length;
-    const maxTransfers = Math.min(34, Math.max(10, Math.ceil(regularTeamCount * 0.72)));
+    // 移籍成立件数の上限。チーム数に比例させ、大規模ワールド(100チーム以上)でも
+    // 十分な件数の移籍が成立するようにする。以前は Math.min(34, ...) で
+    // 34件に固定されており、チーム数が増えても移籍がほとんど起きなかった。
+    const maxTransfers = Math.max(10, Math.ceil(regularTeamCount * 0.9));
     const completed = [];
     const blockedPlayers = new Set((world.transferMarket?.transfers || []).map((row) => row.playerId));
 
     for (let day = 1; day <= market.days.total && completed.length < maxTransfers; day += 1) {
       market.days.current = day;
-      const phase = transferMarketDayPhase(day, market.days.total);
+      const phase = transferMarketDayPhase(day, market.days.total, regularTeamCount);
       const report = transferMarketReport(world, "all", { allowCompetition: true, proposalLimit: Math.max(24, phase.maxDailyOffers * 3) });
       const alreadyActive = new Set((market.activeOffers || []).map(transferOfferKey));
       const newOffers = (report.proposals || [])
@@ -4075,7 +4085,14 @@ async function runTransferMarket() {
     market.activeOffers = (market.activeOffers || []).slice(0, 80);
     market.updatedAt = new Date().toISOString();
 
-    for (let index = maxTransfers; index < maxTransfers; index += 1) {
+    // 市場日数を消化しても目標件数 (maxTransfers) に届かなかった場合の補完。
+    // 確実に成立できる提案を直接成立させ、件数不足を解消する。
+    // (以前は `index = maxTransfers; index < maxTransfers` で条件が常に偽となり、
+    //  このフォールバックは一度も実行されていなかった)
+    let fallbackGuard = 0;
+    while (completed.length < maxTransfers && fallbackGuard < maxTransfers * 4) {
+      fallbackGuard += 1;
+      const index = completed.length;
       const report = transferMarketReport(world, "all");
       const proposal = (report.proposals || []).find((item) => !blockedPlayers.has(item.playerId) && canFinalizeTransfer(world, item, index));
       if (!proposal) break;
@@ -4087,7 +4104,7 @@ async function runTransferMarket() {
       blockedPlayers.add(record.playerId);
       completed.push(record);
       setStatus(`移籍市場処理中... ${completed.length}件成立`);
-      if (index % 4 === 3) await yieldToBrowser();
+      if (fallbackGuard % 4 === 3) await yieldToBrowser();
     }
 
     state.world = world;
