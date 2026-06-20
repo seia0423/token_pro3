@@ -3231,6 +3231,8 @@ function simulateNegotiation(world, proposal, rawProposals = []) {
 function buildTransferProposals(world, teams, needs, candidates, options = {}) {
   const allowCompetition = Boolean(options.allowCompetition);
   const proposalLimit = Number(options.proposalLimit || 20);
+  // 1回の処理で検討する買い手ニーズ数。大規模ワールドでは提案数を増やすため拡大する（既定20）。
+  const needLimit = Math.max(20, Number(options.needLimit || 0));
   const teamsById = new Map(teams.map((team) => [team.id, team]));
   const marketTeams = (world.teams || []).filter((team) => !team.competitionOnly);
   const allTeamsById = new Map(marketTeams.map((team) => [team.id, team]));
@@ -3259,7 +3261,7 @@ function buildTransferProposals(world, teams, needs, candidates, options = {}) {
     .filter((candidate) => candidate.team && candidate.player);
   const rawProposals = [];
 
-  for (const need of needs.slice(0, 20)) {
+  for (const need of needs.slice(0, needLimit)) {
     const buyer = teamsById.get(need.teamId);
     if (!buyer) continue;
     const buyerRequirement = teamTransferRequirements(buyer)[need.groupKey];
@@ -3481,10 +3483,14 @@ function transferMarketReport(world, leagueId = "all", options = {}) {
   const sortedNeeds = needs.sort((a, b) => b.priority - a.priority);
   const sortedCandidates = candidates.sort((a, b) => b.score - a.score || b.rating - a.rating);
 
+  // 提案生成に渡す候補プールは、大規模ワールドで提案数が頭打ちにならないよう
+  // チーム数に応じて拡大する（既定80）。
+  const candidatePoolSize = Math.max(80, Number(options.candidatePoolSize || 0));
+
   return {
     needs: sortedNeeds.slice(0, 10),
     candidates: sortedCandidates.slice(0, 12),
-    proposals: buildTransferProposals(world, teams, sortedNeeds, sortedCandidates.slice(0, 80), options),
+    proposals: buildTransferProposals(world, teams, sortedNeeds, sortedCandidates.slice(0, candidatePoolSize), options),
   };
 }
 
@@ -3846,8 +3852,8 @@ function applyFinalizedTransfer(world, proposal, index) {
 function transferMarketDayPhase(day, totalDays, teamCount = 0) {
   const rate = day / Math.max(1, totalDays);
   // チーム数に応じて1日あたりの最大オファー数をスケールさせる。
-  // 大規模ワールド(100チーム以上)では候補も多いため、処理量を増やす。
-  const scale = Math.max(1, Math.ceil(teamCount / 24));
+  // 目標成立件数(チーム数x4)に日数内で到達できるよう、処理量を多めに確保する。
+  const scale = Math.max(1, Math.ceil(teamCount / 12));
   if (rate >= 0.84) return { key: "deadline", label: "終盤", pressure: 0.34, offerMultiplier: 1.08, maxDailyOffers: 18 * scale };
   if (rate >= 0.5) return { key: "middle", label: "中盤", pressure: 0.18, offerMultiplier: 1.02, maxDailyOffers: 14 * scale };
   return { key: "early", label: "序盤", pressure: 0.02, offerMultiplier: 0.96, maxDailyOffers: 10 * scale };
@@ -4042,24 +4048,30 @@ async function runTransferMarket() {
     const market = ensureTransferMarket(world);
     const regularTeamCountForDays = (world.teams || []).filter((team) => !team.competitionOnly).length;
     // 市場日数もチーム規模に合わせて延長する。大規模ワールドでは1日あたりの
-    // オファー処理だけでは目標成立件数に届かないため、日数を増やす。
-    const marketDays = Math.min(90, Math.max(30, Math.ceil(regularTeamCountForDays * 0.6)));
+    // オファー処理だけでは目標成立件数(チーム数x4)に届かないため、日数を増やす。
+    const marketDays = Math.min(180, Math.max(30, Math.ceil(regularTeamCountForDays * 1.5)));
     market.days = { total: marketDays, current: 0 };
     market.dailyLogs = [];
     market.offerHistory = market.offerHistory || [];
     market.activeOffers = [];
     const regularTeamCount = (world.teams || []).filter((team) => !team.competitionOnly).length;
-    // 移籍成立件数の上限。チーム数に比例させ、大規模ワールド(100チーム以上)でも
-    // 十分な件数の移籍が成立するようにする。以前は Math.min(34, ...) で
-    // 34件に固定されており、チーム数が増えても移籍がほとんど起きなかった。
-    const maxTransfers = Math.max(10, Math.ceil(regularTeamCount * 0.9));
+    // 移籍成立件数の上限。チーム数 x 4 を目安とする（1チームあたり概ね4件の出入り）。
+    // 以前は Math.min(34, ...) で34件に固定されており、チーム数が増えても
+    // 移籍がほとんど起きなかった。
+    const maxTransfers = Math.max(12, Math.ceil(regularTeamCount * 4));
     const completed = [];
     const blockedPlayers = new Set((world.transferMarket?.transfers || []).map((row) => row.playerId));
 
     for (let day = 1; day <= market.days.total && completed.length < maxTransfers; day += 1) {
       market.days.current = day;
       const phase = transferMarketDayPhase(day, market.days.total, regularTeamCount);
-      const report = transferMarketReport(world, "all", { allowCompetition: true, proposalLimit: Math.max(24, phase.maxDailyOffers * 3) });
+      const report = transferMarketReport(world, "all", {
+        allowCompetition: true,
+        proposalLimit: Math.max(24, phase.maxDailyOffers * 3),
+        // 大規模ワールドで提案数が頭打ちにならないよう、検討ニーズ数と候補プールを拡大。
+        needLimit: Math.max(20, regularTeamCount),
+        candidatePoolSize: Math.max(80, regularTeamCount * 4),
+      });
       const alreadyActive = new Set((market.activeOffers || []).map(transferOfferKey));
       const newOffers = (report.proposals || [])
         .filter((proposal) => !blockedPlayers.has(proposal.playerId))
@@ -4093,7 +4105,11 @@ async function runTransferMarket() {
     while (completed.length < maxTransfers && fallbackGuard < maxTransfers * 4) {
       fallbackGuard += 1;
       const index = completed.length;
-      const report = transferMarketReport(world, "all");
+      const report = transferMarketReport(world, "all", {
+        proposalLimit: Math.max(40, regularTeamCount * 2),
+        needLimit: Math.max(20, regularTeamCount),
+        candidatePoolSize: Math.max(80, regularTeamCount * 4),
+      });
       const proposal = (report.proposals || []).find((item) => !blockedPlayers.has(item.playerId) && canFinalizeTransfer(world, item, index));
       if (!proposal) break;
       const record = applyFinalizedTransfer(world, proposal, index);
