@@ -1,0 +1,75 @@
+{
+  "name": "Seiran Guard",
+  "players": [
+    {
+      "fullName": "Haruto Kisaragi",
+      "rating": 84,
+      "bestPosition": "17",
+      "positionRatings": { "17": 91, "7": 84, "10": 77, "5": 73, "6": 73 },
+      "stats": { "speed": 83, "agility": 85, "technique": 86, "shot": 86, "carry": 82, "flair": 84, "composure": 78 }
+    },
+    {
+      "fullName": "Noa Fushimi",
+      "rating": 80,
+      "bestPosition": "14",
+      "positionRatings": { "14": 88, "4": 80, "11": 78, "1": 72 },
+      "stats": { "stamina": 86, "pass": 82, "marking": 84, "positioning": 87, "teamwork": 85, "decision": 83 }
+    },
+    {
+      "fullName": "Ibuki Hoshina",
+      "rating": 78,
+      "bestPosition": "12",
+      "positionRatings": { "12": 86, "2": 79, "5": 72, "4": 68 },
+      "stats": { "speed": 82, "stamina": 84, "cross": 83, "pass": 77, "marking": 76, "teamwork": 80 }
+    },
+    {
+      "fullName": "Rika Minase",
+      "rating": 77,
+      "bestPosition": "13",
+      "positionRatings": { "13": 85, "3": 79, "6": 72, "4": 67 },
+      "stats": { "speed": 81, "stamina": 83, "cross": 82, "pass": 78, "marking": 77, "focus": 79 }
+    },
+    {
+      "fullName": "Shin Kurosawa",
+      "rating": 79,
+      "bestPosition": "1",
+      "positionRatings": { "1": 87, "11": 81, "2": 72, "3": 72, "14": 73 },
+      "stats": { "balance": 82, "marking": 85, "blade": 84, "positioning": 85, "anticipation": 84, "composure": 81 }
+    },
+    {
+      "fullName": "Mei Kanzaki",
+      "rating": 75,
+      "bestPosition": "4",
+      "positionRatings": { "4": 83, "10": 76, "14": 72, "15": 70, "16": 70 },
+      "stats": { "technique": 82, "pass": 85, "firstTouch": 80, "vision": 83, "teamwork": 81, "decision": 78 }
+    },
+    {
+      "fullName": "Sora Amamiya",
+      "rating": 74,
+      "bestPosition": "7",
+      "positionRatings": { "7": 82, "17": 76, "5": 70, "6": 70 },
+      "stats": { "speed": 79, "stamina": 74, "technique": 77, "shot": 82, "shoot": 81, "composure": 76 }
+    },
+    {
+      "fullName": "Itsuki Nanjo",
+      "rating": 72,
+      "bestPosition": "2",
+      "positionRatings": { "2": 81, "12": 75, "1": 67, "5": 63 },
+      "stats": { "speed": 75, "stamina": 80, "marking": 80, "blade": 76, "positioning": 77, "teamwork": 76 }
+    },
+    {
+      "fullName": "Akari Tendo",
+      "rating": 71,
+      "bestPosition": "3",
+      "positionRatings": { "3": 80, "13": 74, "1": 67, "6": 62 },
+      "stats": { "speed": 74, "stamina": 79, "marking": 79, "blade": 76, "positioning": 78, "anticipation": 76 }
+    },
+    {
+      "fullName": "Kaito Narumi",
+      "rating": 70,
+      "bestPosition": "15",
+      "positionRatings": { "15": 79, "5": 72, "10": 71, "17": 68 },
+      "stats": { "speed": 80, "technique": 78, "carry": 80, "shot": 73, "vision": 75, "flair": 78 }
+    }
+  ]
+}

@@ -1,0 +1,75 @@
+{
+  "name": "Akatsuki Blades",
+  "players": [
+    {
+      "fullName": "Aoi Kiriya",
+      "rating": 82,
+      "bestPosition": "7",
+      "positionRatings": { "7": 90, "17": 80, "5": 74, "6": 73 },
+      "stats": { "speed": 84, "stamina": 78, "technique": 82, "shot": 88, "pass": 71, "teamwork": 70, "vision": 77, "composure": 81 }
+    },
+    {
+      "fullName": "Ren Makabe",
+      "rating": 78,
+      "bestPosition": "4",
+      "positionRatings": { "4": 86, "10": 78, "14": 75, "12": 69, "13": 69 },
+      "stats": { "stamina": 81, "technique": 84, "pass": 88, "firstTouch": 82, "teamwork": 83, "vision": 86, "decision": 80 }
+    },
+    {
+      "fullName": "Saki Natori",
+      "rating": 76,
+      "bestPosition": "5",
+      "positionRatings": { "5": 84, "15": 77, "7": 70, "12": 65 },
+      "stats": { "speed": 86, "acceleration": 85, "stamina": 75, "cross": 80, "carry": 79, "shot": 72, "aggression": 76 }
+    },
+    {
+      "fullName": "Mio Shiranui",
+      "rating": 75,
+      "bestPosition": "6",
+      "positionRatings": { "6": 83, "16": 77, "7": 68, "13": 66 },
+      "stats": { "speed": 82, "agility": 83, "stamina": 77, "cross": 81, "carry": 76, "shot": 73, "teamwork": 78 }
+    },
+    {
+      "fullName": "Kei Tsukino",
+      "rating": 79,
+      "bestPosition": "1",
+      "positionRatings": { "1": 87, "11": 80, "2": 73, "3": 73, "14": 71 },
+      "stats": { "balance": 81, "marking": 84, "blade": 85, "positioning": 86, "anticipation": 83, "decision": 79, "composure": 82 }
+    },
+    {
+      "fullName": "Rui Kogane",
+      "rating": 74,
+      "bestPosition": "2",
+      "positionRatings": { "2": 82, "12": 76, "1": 70, "5": 65 },
+      "stats": { "speed": 76, "stamina": 80, "marking": 81, "blade": 78, "positioning": 79, "teamwork": 77 }
+    },
+    {
+      "fullName": "Hana Arisawa",
+      "rating": 73,
+      "bestPosition": "3",
+      "positionRatings": { "3": 81, "13": 76, "1": 69, "6": 64 },
+      "stats": { "speed": 74, "stamina": 82, "marking": 80, "blade": 77, "positioning": 78, "focus": 79 }
+    },
+    {
+      "fullName": "Toma Igarashi",
+      "rating": 72,
+      "bestPosition": "14",
+      "positionRatings": { "14": 81, "4": 75, "11": 72, "1": 66 },
+      "stats": { "stamina": 84, "pass": 76, "marking": 78, "positioning": 80, "teamwork": 82, "leadership": 77 }
+    },
+    {
+      "fullName": "Nagi Kohaku",
+      "rating": 70,
+      "bestPosition": "10",
+      "positionRatings": { "10": 79, "4": 72, "17": 70, "15": 68, "16": 68 },
+      "stats": { "technique": 81, "pass": 80, "shot": 70, "vision": 82, "flair": 80, "decision": 73 }
+    },
+    {
+      "fullName": "Yuna Saionji",
+      "rating": 69,
+      "bestPosition": "11",
+      "positionRatings": { "11": 78, "1": 72, "14": 70, "4": 65 },
+      "stats": { "speed": 78, "stamina": 76, "marking": 75, "positioning": 79, "anticipation": 77, "composure": 76 }
+    }
+  ]
+}

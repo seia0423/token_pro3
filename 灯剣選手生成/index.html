@@ -1,0 +1,295 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>灯剣選手生成</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <main class="app-shell">
+      <section class="toolbar" aria-label="生成条件">
+        <div class="brand">
+          <h1>灯剣選手生成</h1>
+          <p>Excel マスタを使う安定版ジェネレータ</p>
+        </div>
+
+        <label>
+          対象
+          <select id="groupSelect"></select>
+        </label>
+
+        <label>
+          人数
+          <input id="countInput" type="number" min="1" max="200" value="20" />
+        </label>
+
+        <label>
+          強さ補正
+          <input id="strengthAdjustInput" type="number" min="-12" max="12" step="1" value="0" />
+        </label>
+
+        <label>
+          シード
+          <input id="seedInput" type="text" value="touken-2026" />
+        </label>
+
+        <label class="check-row">
+          <input id="statsInput" type="checkbox" />
+          全ステータス
+        </label>
+
+        <label class="check-row">
+          <input id="secretInput" type="checkbox" />
+          ㊙項目
+        </label>
+
+        <button id="generateButton" type="button">生成</button>
+      </section>
+
+      <section class="summary-band" aria-label="生成結果サマリー">
+        <div>
+          <span>生成数</span>
+          <strong id="totalCount">0</strong>
+        </div>
+        <div>
+          <span>平均適性</span>
+          <strong id="averageRating">0.0</strong>
+        </div>
+        <div>
+          <span>最多ポジション</span>
+          <strong id="topPosition">-</strong>
+        </div>
+        <div>
+          <span>対象国籍</span>
+          <strong id="nationalityCount">0</strong>
+        </div>
+      </section>
+
+      <section class="target-panel" aria-label="狙い生成">
+        <div class="target-head">
+          <div>
+            <h2>狙い生成</h2>
+            <p>欲しい選手像に寄せて候補を生成します</p>
+          </div>
+          <button id="targetGenerateButton" type="button">狙って生成</button>
+        </div>
+        <div class="target-grid">
+          <label>
+            主ポジション
+            <select id="targetPositionSelect"></select>
+          </label>
+          <label>
+            傾向
+            <select id="targetArchetypeSelect">
+              <option value="">おまかせ</option>
+              <option value="balanced">万能寄り</option>
+              <option value="physical">フィジカル</option>
+              <option value="technical">技術型</option>
+              <option value="mental">判断型</option>
+              <option value="attack">攻撃型</option>
+              <option value="defense">守備型</option>
+            </select>
+          </label>
+          <label>
+            強さ
+            <select id="targetStrengthSelect">
+              <option value="normal">標準</option>
+              <option value="prospect">素材型</option>
+              <option value="strong">即戦力</option>
+              <option value="elite">エース級</option>
+            </select>
+          </label>
+          <label>
+            年齢帯
+            <select id="targetAgeSelect">
+              <option value="">おまかせ</option>
+              <option value="young">若手 16-21</option>
+              <option value="prime">全盛期 22-29</option>
+              <option value="veteran">ベテラン 30-38</option>
+            </select>
+          </label>
+          <label>
+            性別
+            <select id="targetGenderSelect">
+              <option value="">おまかせ</option>
+              <option value="男">男</option>
+              <option value="女">女</option>
+            </select>
+          </label>
+          <label>
+            利き手
+            <select id="targetHandSelect">
+              <option value="">おまかせ</option>
+              <option value="右">右</option>
+              <option value="左">左</option>
+              <option value="両">両</option>
+            </select>
+          </label>
+        </div>
+      </section>
+
+      <section class="team-gen-panel" aria-label="チーム生成">
+        <div class="target-head team-gen-head">
+          <div>
+            <h2>チーム生成</h2>
+            <p>強度と編成の傾向を決めて、登録メンバーをまとめて作ります</p>
+          </div>
+          <button id="teamGenerateButton" type="button">チーム生成</button>
+        </div>
+        <div class="team-gen-grid">
+          <label>
+            人数
+            <select id="teamRosterSize">
+              <option value="20">登録 20人</option>
+              <option value="16">ベンチ入り 16人</option>
+              <option value="7">スタメン 7人</option>
+            </select>
+          </label>
+          <label>
+            強度
+            <select id="teamStrengthRank">
+              <option value="weak">弱小</option>
+              <option value="lower">下位</option>
+              <option value="middle" selected>中堅</option>
+              <option value="upper">上位</option>
+              <option value="strong">強豪</option>
+              <option value="contender">優勝候補</option>
+              <option value="world">世界トップ</option>
+            </select>
+          </label>
+          <label>
+            補正
+            <input id="teamStrengthAdjust" type="number" min="-10" max="10" step="1" value="0" />
+          </label>
+          <label>
+            ばらつき
+            <select id="teamVarianceSelect">
+              <option value="tight">小</option>
+              <option value="standard" selected>標準</option>
+              <option value="wide">大</option>
+            </select>
+          </label>
+          <label>
+            スター
+            <select id="teamStarCount">
+              <option value="auto" selected>自動</option>
+              <option value="0">なし</option>
+              <option value="1">1人</option>
+              <option value="2">2人</option>
+              <option value="3">3人</option>
+            </select>
+          </label>
+          <label>
+            控え層
+            <select id="teamDepthSelect">
+              <option value="thin">薄い</option>
+              <option value="standard" selected>標準</option>
+              <option value="deep">厚い</option>
+            </select>
+          </label>
+          <label>
+            基本形
+            <select id="teamFormationSelect"></select>
+          </label>
+          <label>
+            傾向
+            <select id="teamStyleSelect">
+              <option value="balanced" selected>バランス</option>
+              <option value="defense">守備</option>
+              <option value="midfield">中盤支配</option>
+              <option value="attack">攻撃</option>
+              <option value="counter">カウンター</option>
+            </select>
+          </label>
+          <label>
+            年齢構成
+            <select id="teamAgeMixSelect">
+              <option value="standard" selected>標準</option>
+              <option value="young">若手多め</option>
+              <option value="veteran">ベテラン多め</option>
+              <option value="mixed">幅広い</option>
+            </select>
+          </label>
+          <label>
+            反映
+            <select id="teamOutputMode">
+              <option value="replace" selected>採用チームを置換</option>
+              <option value="add">採用チームに追加</option>
+              <option value="candidates">候補一覧のみ</option>
+            </select>
+          </label>
+        </div>
+        <div class="team-gen-status" id="teamGenerationStatus"></div>
+      </section>
+
+      <section class="result-tools" aria-label="表示操作">
+        <input id="filterInput" type="search" placeholder="名前・国籍・ポジションで絞り込み" />
+        <button id="jsonButton" type="button">JSON</button>
+      </section>
+
+      <section class="table-wrap" aria-label="生成選手一覧">
+        <table>
+          <thead id="tableHead"></thead>
+          <tbody id="tableBody"></tbody>
+        </table>
+      </section>
+
+      <section class="detail-panel" id="detailPanel" aria-label="選手詳細">
+        <div class="detail-empty">選手を選ぶと、全ステータスとポジション適性を確認できます</div>
+      </section>
+
+      <section class="team-panel" aria-label="採用チーム">
+        <div class="team-head">
+          <div>
+            <h2>採用チーム</h2>
+            <p>生成候補から採用、または手入力で選手を登録します</p>
+          </div>
+          <div class="team-actions">
+            <button id="adoptSelectedButton" type="button">選手を採用</button>
+            <button id="newManualButton" type="button">手入力</button>
+            <button id="importTeamButton" type="button">チーム読込</button>
+            <button id="exportTeamButton" type="button">チーム出力</button>
+            <button id="clearTeamButton" type="button">チーム削除</button>
+            <input id="teamImportInput" class="file-input" type="file" accept=".json,application/json" />
+          </div>
+        </div>
+        <div class="team-summary" id="teamSummary"></div>
+        <div class="team-import-status" id="teamImportStatus"></div>
+        <div class="team-layout">
+          <div class="team-list" id="teamList"></div>
+          <form class="player-editor" id="playerEditor">
+            <div class="detail-empty">採用選手を選ぶか、手入力を開始してください</div>
+          </form>
+        </div>
+      </section>
+
+      <section class="planner-panel" aria-label="チームプランナー">
+        <div class="planner-head">
+          <div>
+            <h2>チームプランナー</h2>
+            <p>採用チームから、重複なしで各ポジションの候補を組みます</p>
+          </div>
+          <label>
+            形
+            <select id="formationSelect">
+              <option value="f313">3-1-3</option>
+              <option value="f223">2-2-3</option>
+              <option value="f232">2-3-2</option>
+              <option value="f331">3-3-1</option>
+              <option value="f241">2-4-1</option>
+              <option value="f322">3-2-2</option>
+              <option value="f421">4-2-1</option>
+              <option value="f412">4-1-2</option>
+            </select>
+          </label>
+        </div>
+        <div class="planner-summary" id="plannerSummary"></div>
+        <div class="planner-grid" id="plannerGrid"></div>
+      </section>
+    </main>
+
+    <script src="./data/generator-data.js"></script>
+    <script type="module" src="./app.js"></script>
+  </body>
+</html>

@@ -1,0 +1,18 @@
+{
+  "name": "touken-battle-sim",
+  "version": "0.1.0",
+  "description": "Match simulator for teams exported from Touken player generator.",
+  "type": "module",
+  "private": true,
+  "bin": {
+    "touken-battle": "./src/cli.js"
+  },
+  "scripts": {
+    "web": "node src/web-server.js --open",
+    "sample": "node src/cli.js samples/team-a.json samples/team-b.json --seed sample-match",
+    "test": "node --test"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

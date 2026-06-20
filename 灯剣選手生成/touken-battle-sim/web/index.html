@@ -1,0 +1,288 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>灯剣 試合シミュレーター</title>
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <main class="app-shell">
+      <header class="topbar">
+        <div>
+          <h1>灯剣 試合シミュレーター</h1>
+          <p id="statusText">準備中</p>
+        </div>
+        <div class="top-actions">
+          <button id="runMatchTop" class="primary" type="button">1試合</button>
+          <button id="runSeriesTop" type="button">連戦</button>
+          <button id="runLeagueTop" type="button">リーグ</button>
+          <button id="progressWorldTop" type="button">ワールド</button>
+        </div>
+      </header>
+
+      <section class="workspace">
+        <form class="control-panel" id="settingsForm">
+          <fieldset>
+            <legend>チーム</legend>
+            <div class="team-library">
+              <div class="library-head">
+                <strong>登録チーム</strong>
+                <span id="libraryCount">0件</span>
+              </div>
+              <input id="libraryFiles" type="file" accept="application/json,.json" multiple />
+              <div class="library-actions">
+                <select id="librarySelect"></select>
+                <button id="loadLibraryHome" type="button">Homeへ</button>
+                <button id="loadLibraryAway" type="button">Awayへ</button>
+              </div>
+              <div class="library-actions">
+                <button id="registerLoadedTeams" type="button">現在の2チームを登録</button>
+                <button id="deleteLibraryTeam" type="button">選択を削除</button>
+              </div>
+            </div>
+            <div class="team-loaders">
+              <div class="team-loader">
+                <div class="team-head">
+                  <span>Home</span>
+                  <strong id="homeName">未読込</strong>
+                </div>
+                <input id="homeFile" type="file" accept="application/json,.json" />
+              </div>
+
+              <div class="team-loader">
+                <div class="team-head">
+                  <span>Away</span>
+                  <strong id="awayName">未読込</strong>
+                </div>
+                <input id="awayFile" type="file" accept="application/json,.json" />
+              </div>
+            </div>
+          </fieldset>
+
+          <fieldset>
+            <legend>試合設定</legend>
+            <div class="field-grid">
+              <label>
+                Homeフォーメーション
+                <select id="homeFormation"></select>
+              </label>
+              <label>
+                Awayフォーメーション
+                <select id="awayFormation"></select>
+              </label>
+              <label>
+                Home戦術
+                <select id="homeTactic"></select>
+              </label>
+              <label>
+                Away戦術
+                <select id="awayTactic"></select>
+              </label>
+              <label>
+                Home調子
+                <select id="homeCondition"></select>
+              </label>
+              <label>
+                Away調子
+                <select id="awayCondition"></select>
+              </label>
+              <label>
+                seed
+                <input id="seed" type="text" autocomplete="off" />
+              </label>
+              <label>
+                連戦数
+                <input id="matches" type="number" min="1" max="2000" step="1" value="100" />
+              </label>
+              <label>
+                控え交代/間
+                <input id="regularSubstitutionsPerBreak" type="number" min="0" max="5" step="1" value="2" />
+              </label>
+            </div>
+
+            <div class="toggles">
+              <label class="check">
+                <input id="enableChangers" type="checkbox" checked />
+                チェンジャー
+              </label>
+              <label class="check">
+                <input id="enableBenchSubstitutions" type="checkbox" checked />
+                控え交代
+              </label>
+              <label class="check">
+                <input id="enableFatigue" type="checkbox" checked />
+                疲労
+              </label>
+              <label class="check">
+                <input id="adjustLineupByCondition" type="checkbox" checked />
+                調子で選考
+              </label>
+              <label class="check">
+                <input id="includePassEvents" type="checkbox" />
+                パスログ
+              </label>
+              <label class="check">
+                <input id="lockSeed" type="checkbox" />
+                seed固定
+              </label>
+            </div>
+          </fieldset>
+
+          <fieldset>
+            <legend>リーグ</legend>
+            <div class="league-control">
+              <div class="library-head">
+                <strong>シーズン登録</strong>
+                <span id="leagueTeamCount">0チーム</span>
+              </div>
+              <div class="library-actions">
+                <button id="loadGermanLeagueTeams" type="button">ドイツ16チーム読込</button>
+                <button id="useLibraryForLeague" type="button">登録チームを使用</button>
+              </div>
+              <label>
+                リーグ名
+                <input id="leagueName" type="text" value="ドイツリーグ" autocomplete="off" />
+              </label>
+              <div class="toggles">
+                <label class="check">
+                  <input id="enableSeasonFatigue" type="checkbox" checked />
+                  シーズン疲労
+                </label>
+              </div>
+            </div>
+          </fieldset>
+
+          <fieldset>
+            <legend>ワールド</legend>
+            <div class="world-control">
+              <div class="library-head">
+                <strong>シーズン構成</strong>
+                <span id="worldDraftCount">0リーグ</span>
+              </div>
+              <div class="field-grid">
+                <label>
+                  シーズン
+                  <input id="worldSeasonLabel" type="text" value="29/30" autocomplete="off" />
+                </label>
+                <label>
+                  日程seed
+                  <input id="worldScheduleSeed" type="text" value="touken-schedule" autocomplete="off" />
+                </label>
+                <label>
+                  開始日
+                  <input id="worldStartDate" type="date" value="2029-09-15" />
+                </label>
+                <label>
+                  終了日
+                  <input id="worldEndDate" type="date" value="2030-07-15" />
+                </label>
+                <label>
+                  国
+                  <select id="worldCountry"></select>
+                </label>
+                <label>
+                  リーグ名
+                  <input id="worldLeagueName" type="text" value="ドイツリーグ" autocomplete="off" />
+                </label>
+                <label>
+                  CL枠
+                  <input id="worldClSlots" type="number" min="0" max="8" step="1" value="4" />
+                </label>
+                <label>
+                  開催方式
+                  <select id="worldLeagueFormat"></select>
+                </label>
+              </div>
+              <div class="world-team-picker" aria-label="ワールド用チーム選択">
+                <div class="library-head">
+                  <strong>チーム選択</strong>
+                  <span id="worldSelectedCount">0チーム</span>
+                </div>
+                <div id="worldTeamPicker" class="world-team-picker-list"></div>
+              </div>
+              <div class="library-actions">
+                <button id="addWorldLeague" type="button">リーグ追加</button>
+                <button id="clearWorldDraft" type="button">構成クリア</button>
+                <button id="createWorld" class="primary" type="button">ワールド作成</button>
+              </div>
+              <div class="library-actions">
+                <button id="progressWorldDay" type="button">1日進行</button>
+                <button id="progressWorldUntil" type="button">指定日まで</button>
+                <button id="exportWorld" type="button">保存出力</button>
+                <button id="runTransferMarket" type="button">移籍市場実行</button>
+                <button id="exportTransferLog" type="button">移籍一覧出力</button>
+                <button id="exportNextSeasonTeams" type="button">翌季チーム出力</button>
+                <button id="importWorld" type="button">保存読込</button>
+              </div>
+              <label>
+                進行先
+                <input id="worldProgressUntilDate" type="date" value="2029-10-01" />
+              </label>
+              <input id="worldImportFile" class="file-input" type="file" accept="application/json,.json" />
+              <div id="worldDraftList" class="world-draft-list"></div>
+            </div>
+          </fieldset>
+
+          <div class="action-row">
+            <button id="runMatch" class="primary" type="button">1試合を実行</button>
+            <button id="runSeries" type="button">連戦で確認</button>
+            <button id="runLeague" type="button">リーグ1シーズン</button>
+            <button id="progressWorldAction" type="button">ワールド1日進行</button>
+            <button id="clearSaved" type="button">読込をクリア</button>
+          </div>
+        </form>
+
+        <section class="result-panel">
+          <div id="scoreboard" class="scoreboard empty">
+            <div>
+              <span>Home</span>
+              <strong>-</strong>
+            </div>
+            <div class="scoreline">-</div>
+            <div>
+              <span>Away</span>
+              <strong>-</strong>
+            </div>
+          </div>
+
+          <div id="scoreDetails" class="score-details"></div>
+          <div id="changeSummary" class="change-summary"></div>
+
+          <div id="summaryGrid" class="summary-grid"></div>
+
+          <div class="tabs" role="tablist">
+            <button class="tab active" type="button" data-tab="log">ログ</button>
+            <button class="tab" type="button" data-tab="lineup">編成</button>
+            <button class="tab" type="button" data-tab="series">連戦</button>
+            <button class="tab" type="button" data-tab="league">リーグ</button>
+            <button class="tab" type="button" data-tab="world">ワールド</button>
+          </div>
+
+          <section id="tab-log" class="tab-panel active">
+            <div id="goals" class="goals"></div>
+            <div id="eventLog" class="event-log"></div>
+          </section>
+
+          <section id="tab-lineup" class="tab-panel">
+            <div id="lineups" class="lineups"></div>
+          </section>
+
+          <section id="tab-series" class="tab-panel">
+            <div id="seriesResult" class="series-result"></div>
+          </section>
+
+          <section id="tab-league" class="tab-panel">
+            <div id="leagueResult" class="league-result"></div>
+          </section>
+
+          <section id="tab-world" class="tab-panel">
+            <div id="worldResult" class="world-result"></div>
+          </section>
+        </section>
+      </section>
+    </main>
+
+    <script type="module" src="/app.js"></script>
+  </body>
+</html>
