@@ -442,8 +442,16 @@ async function postJson(url, payload) {
     headers: { "content-type": "application/json" },
     body: JSON.stringify(payload),
   });
-  const data = await response.json();
-  if (!response.ok) throw new Error(data.error || "Request failed.");
+  const text = await response.text();
+  let data;
+  try {
+    data = text ? JSON.parse(text) : {};
+  } catch {
+    // サーバーがプレーンテキストでエラーを返した場合（例: "JSON body is too large."）
+    if (!response.ok) throw new Error(text || `Request failed (${response.status}).`);
+    throw new Error("サーバーの応答を解析できませんでした。");
+  }
+  if (!response.ok) throw new Error(data.error || text || "Request failed.");
   return data;
 }
 
