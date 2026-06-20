@@ -56,13 +56,18 @@ function sendText(res, status, text) {
   res.end(text);
 }
 
+// 10リーグ規模のワールド全体（全チーム・全選手の状態）を毎回 POST するため、
+// 8MB では足りずに "JSON body is too large." が発生していた。
+// localhost で動かすローカルツールのため、上限を大きめに引き上げる。
+const MAX_JSON_BODY_BYTES = 256 * 1024 * 1024;
+
 async function readJsonBody(req) {
   const chunks = [];
   let size = 0;
 
   for await (const chunk of req) {
     size += chunk.length;
-    if (size > 8 * 1024 * 1024) {
+    if (size > MAX_JSON_BODY_BYTES) {
       throw new Error("JSON body is too large.");
     }
     chunks.push(chunk);
